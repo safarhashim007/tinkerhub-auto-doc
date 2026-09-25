@@ -1,0 +1,22 @@
+name: daily tinkerhub digest
+on:
+  schedule: [{cron: "30 12 * * *"}] # 18:00 IST daily
+  workflow_dispatch:
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -r requirements.txt
+      - run: python src/event_searcher_groq.py
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - run: |
+          git config user.name "tinkerbot"
+          git config user.email "bot@tinkerhub.auto"
+          git push || true
