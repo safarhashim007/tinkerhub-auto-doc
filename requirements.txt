@@ -1,0 +1,8 @@
+requests
+python-dotenv
+groq
+google-generativeai
+huggingface_hub
+apscheduler
+yt-dlp
+ffmpeg-python

@@ -1,0 +1,4 @@
+.env
+tmp/*.mp4
+tmp/*.wav
+tmp/*.jpg
