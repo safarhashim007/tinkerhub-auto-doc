@@ -72,7 +72,17 @@ def digest_with_groq_openrouter(video="tmp/stream.mp4"):
     os.makedirs("docs",exist_ok=True)
     open(out,"w").write(text)
     print(f"groq digest -> {out}")
-    # push
+    # push to tinkerhub-event-documentation repo
+    docs_repo=os.getenv("DOCS_REPO","safarhashim007/tinkerhub-event-documentation")
+    tmp2="/tmp/docs_repo"
+    subprocess.run(["rm","-rf",tmp2], check=False)
+    subprocess.run(["git","clone",f"https://{os.getenv('GITHUB_TOKEN','') and f'x-access-token:{os.getenv(\"GITHUB_TOKEN\")}@' or ''}github.com/{docs_repo}.git", tmp2], check=False)
+    if os.path.exists(tmp2):
+        subprocess.run(["cp", out, tmp2+"/"], check=False)
+        subprocess.run(["git","add","."], cwd=tmp2, check=False)
+        subprocess.run(["git","-c","user.name=tinkerbot","-c","user.email=bot@tinkerhub.auto","commit","-m",f"doc {datetime.now().date()} detailed with host"], cwd=tmp2, check=False)
+        subprocess.run(["git","push"], cwd=tmp2, check=False)
+    # also push to own repo
     subprocess.run(["git","add",out], cwd="/home/tinkerspace/tinkerhub-auto-doc", check=False)
     subprocess.run(["git","commit","-m",f"auto-doc {datetime.now().date()}"], cwd="/home/tinkerspace/tinkerhub-auto-doc", check=False)
     subprocess.run(["git","push"], cwd="/home/tinkerspace/tinkerhub-auto-doc", check=False)

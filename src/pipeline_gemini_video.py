@@ -13,16 +13,19 @@ def document_video_gemini(video_path="tmp/stream.mp4"):
         f = client.files.get(name=f.name)
     if f.state.name != "ACTIVE":
         raise RuntimeError(f"Gemini file failed: {f.state.name}")
-    prompt = """You are documenting a TinkerHub event (Maker Thursday / AI Wednesday / Security Tuesday).
-Watch the full 1.5hr video and output markdown:
-# Title (inferred)
-Date, Duration, Event type
-## Summary (5-6 lines)
-## Key demos / topics with timestamps [mm:ss]
-## Tools / tech mentioned
-## Attendance vibe / Q&A highlights
-## Next steps / action items
-Be concise, timestamped."""
+    prompt = """You are documenting a TinkerHub event VERY DETAILED.
+Extract HOST NAME from intro/slides/speech.
+Watch full 1.5hr video and output markdown:
+# Title
+Date, Duration, Host: <name>, Event type
+## Detailed Summary (10-12 lines)
+## Timeline with timestamps [mm:ss] - every major segment
+## Demos/Projects shown in detail
+## Tools / tech / code mentioned
+## Host & speakers
+## Audience Q&A
+## Key takeaways & Next steps
+Include host name prominently."""
     resp = client.models.generate_content(model="gemini-2.5-flash", contents=[f, prompt])
     out = f"docs/{__import__('datetime').datetime.now().strftime('%Y-%m-%d')}-gemini.md"
     os.makedirs("docs", exist_ok=True)

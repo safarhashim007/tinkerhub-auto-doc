@@ -46,16 +46,24 @@ def summarize(transcript, visions):
     print(resp.text)
     return resp.text
 
+from router import route
 if __name__=="__main__":
-    from config import USE_GEMINI_VIDEO
+    event=os.getenv("EVENT_NAME","ai_wednesday")
+    cfg=route(event)
+    print(f"routing {event} -> {cfg}")
     if not os.path.exists("tmp/stream.mp4"):
         print("no stream file, waiting for live capture")
-    elif USE_GEMINI_VIDEO:
+    elif cfg["model"]=="gemini":
         from pipeline_gemini_video import document_video_gemini
         document_video_gemini("tmp/stream.mp4")
     else:
+        # hybrid with weights: ai_wed = more audio (denser transcript), maker_thu = more video (demos)
         extract_audio()
         text=transcribe_groq()
-        frames=extract_frames(timestamps=[300,900,1500,2100,2700,3300])
+        # maker_thu: 9 frames (video heavy), ai_wed: 4 frames (audio heavy)
+        n_frames=9 if cfg["video_weight"]>0.5 else 4
+        stamps=[300+600*i for i in range(n_frames)]
+        frames=extract_frames(timestamps=stamps)
         visions=vision_groq(frames)
+        # weight in prompt
         summarize(text, visions)
